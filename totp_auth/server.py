@@ -2,10 +2,8 @@ import asyncio
 
 from anyio import Path
 
-from classes.config import Config, ServerConfig
-from classes.http_request import HTTPRequest
-from classes.page_loader import PageLoader
-from cookie import create_cookie, get_cookie_data
+from totp_auth.classes import Config, ServerConfig, HTTPRequest, PageLoader
+from totp_auth.cookie import create_cookie, get_cookie_data
 
 
 def redirect_answer(username: str, config: Config):
