@@ -1,9 +1,9 @@
 import asyncio
 
-from classes.config import Config, ServerConfig
-from classes.http_request import HTTPRequest
-from classes.page_loader import PageLoader
-from cookie import create_cookie, get_cookie_data
+from .classes.config import Config, ServerConfig
+from .classes.http_request import HTTPRequest
+from .classes.page_loader import PageLoader
+from .cookie import create_cookie, get_cookie_data
 
 
 def redirect_answer(username: str, config: Config):
@@ -98,7 +98,7 @@ def handle_client_decorator(config, server_config, page_loader):
 
 
 async def start_server_async(config: Config):
-    page_loader = PageLoader("login.html")
+    page_loader = PageLoader("./totp_auth/login.html")
 
     servers_data = []
     for i in config.list_servers():

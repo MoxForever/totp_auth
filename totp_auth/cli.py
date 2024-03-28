@@ -3,8 +3,8 @@ from contextlib import suppress
 
 import pyotp
 
-from classes.config import Config, ServerConfig
-from server import start_server
+from .classes.config import Config, ServerConfig
+from .server import start_server
 
 
 def choose_server_cli(config: Config):
