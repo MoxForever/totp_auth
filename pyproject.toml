@@ -12,6 +12,12 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
     "Operating System :: Linux",
 ]
+dependencies = [
+    "pyotp>=2.9.0",
+]
+
+[project.scripts]
+totp-auth-cli = "src.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/MoxForever/totp_auth"

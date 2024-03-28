@@ -2,3 +2,5 @@
 __pycache__
 *ini
 !example.ini
+dist
+*.egg-info
