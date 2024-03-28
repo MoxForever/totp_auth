@@ -1,0 +1,18 @@
+[project]
+name = "totp_auth"
+version = "1.0.0"
+authors = [
+    { name="MoxForever", email="moxforever10@gmail.com" },
+]
+description = "Easy setup totp-based login for your application"
+readme = "README.md"
+requires-python = ">=3.8"
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: Linux",
+]
+
+[project.urls]
+Homepage = "https://github.com/pypa/sampleproject"
+Issues = "https://github.com/pypa/sampleproject/issues"
