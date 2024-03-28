@@ -2,7 +2,7 @@ import base64
 import hashlib
 from typing import Optional
 
-from .classes.config import Config
+from classes.config import Config
 
 
 def _create_cookie_token(data: str, config: Config) -> str:

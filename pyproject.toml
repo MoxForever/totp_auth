@@ -1,6 +1,6 @@
 [project]
 name = "totp_auth"
-version = "1.0.1"
+version = "1.0.2"
 authors = [
     { name="MoxForever", email="moxforever10@gmail.com" },
 ]
@@ -22,5 +22,5 @@ totp-auth-cli = "totp_auth.cli:main"
 Homepage = "https://github.com/MoxForever/totp_auth"
 Issues = "https://github.com/MoxForever/totp_auth/issues"
 
-[tool.poetry.files]
-include = ["totp_auth/login.html"]
+[tool.setuptools.package-data]
+totp_auth = ["login.html"]
