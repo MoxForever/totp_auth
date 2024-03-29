@@ -20,8 +20,8 @@ class HTTPRequest:
 
     @body.setter
     def set_body(self, v):
-        self.body = v
-        self.headers["Content-Length"] = len(v)
+        self._body = v
+        self.headers["Content-Length"] = str(len(v))
 
     def get_cookies(self) -> dict[str, str]:
         if "Cookie" not in self.headers:
@@ -54,6 +54,11 @@ class HTTPRequest:
             if len(raw) >= body_length:
                 body = raw
                 break
+
+        if headers is None:
+            headers = {}
+        if body is None:
+            body = ""
 
         method, uri, version = request_data.split(" ")
         return HTTPRequest(

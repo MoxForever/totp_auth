@@ -1,6 +1,6 @@
 [project]
 name = "totp_auth"
-version = "1.0.3"
+version = "1.1.0"
 authors = [
     { name="MoxForever", email="moxforever10@gmail.com" },
 ]
@@ -24,4 +24,4 @@ Homepage = "https://github.com/MoxForever/totp_auth"
 Issues = "https://github.com/MoxForever/totp_auth/issues"
 
 [tool.setuptools.package-data]
-totp_auth = ["login.html"]
+totp_auth = ["login.html", "migrations/*.sql"]
