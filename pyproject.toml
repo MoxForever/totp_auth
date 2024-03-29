@@ -13,10 +13,11 @@ classifiers = [
 ]
 dependencies = [
     "pyotp>=2.9.0",
+    "aiosqlite>=0.20.0",
 ]
 
 [project.scripts]
-totp-auth-cli = "totp_auth.cli:main"
+totp-auth = "totp_auth.cli:main"
 
 [project.urls]
 Homepage = "https://github.com/MoxForever/totp_auth"

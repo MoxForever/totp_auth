@@ -1,6 +1,5 @@
 import asyncio
-
-from anyio import Path
+from pathlib import Path
 
 from totp_auth.classes import Config, ServerConfig, HTTPRequest, PageLoader
 from totp_auth.cookie import create_cookie, get_cookie_data
