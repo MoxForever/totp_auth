@@ -99,7 +99,7 @@ jobs:
         gh release create
         '${{ steps.get_release_name.outputs.release_name }}'
         --repo '${{ github.repository }}'
-        --notes 'New release'
+        --notes '${{ github.event.head_commit.message }}'
         --title 'Release ${{ steps.get_release_name.outputs.release_name }}'
     - name: Upload artifact signatures to GitHub Release
       env:

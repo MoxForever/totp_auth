@@ -1,6 +1,6 @@
 [project]
 name = "totp_auth"
-version = "1.1.14"
+version = "1.1.15"
 authors = [
     { name="MoxForever", email="moxforever10@gmail.com" },
 ]
