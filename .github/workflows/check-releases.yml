@@ -20,8 +20,13 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m pip install --upgrade pip
-        
+          python install .
+
+      - name: Install toml-cli
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y toml-cli
+
       - name: Get release name from pyproject.toml
         id: get_release_name
         run: |
