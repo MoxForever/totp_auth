@@ -89,9 +89,11 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
         gh release create
-        '${{ github.ref_name }}'
+        '${{ github.ref }}'
         --repo '${{ github.repository }}'
-        --notes ""
+        --notes \
+        --title "Release ${{ github.ref }}" \
+        --tag ${{ github.ref }}
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
