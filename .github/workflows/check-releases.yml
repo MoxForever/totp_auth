@@ -24,8 +24,7 @@ jobs:
 
       - name: Install toml-cli
         run: |
-          sudo apt-get update
-          sudo apt-get install -y toml-cli
+          pip install toml-cli
 
       - name: Get release name from pyproject.toml
         id: get_release_name
