@@ -20,12 +20,12 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install .
+          python -m pip install --upgrade pip
           pip install poetry
 
       - name: Check if Version Exists
         run: |
-          current_version=$(poetry version | awk '{print $2}')
+          current_version=$(awk -F' = ' '/^version/ {gsub(/"/, "", $2); print $2}' pyproject.toml)
           echo "Current version: $current_version"
           released_version=$(curl -s "https://api.github.com/repos/{owner}/{repo}/releases/tags/v$current_version" | jq -r '.name')
           echo "Released version: $released_version"
@@ -35,3 +35,4 @@ jobs:
           else
             echo "Version $current_version is not released yet."
           fi
+        
