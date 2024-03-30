@@ -63,6 +63,15 @@ jobs:
       id-token: write
 
     steps:
+    - name: Install toml-cli
+      run: |
+        pip install toml-cli
+    - name: Get release name from pyproject.toml
+      id: get_release_name
+      run: |
+        release_name=$(toml get --toml-path pyproject.toml project.version)
+        echo "::set-output name=release_name::$release_name"
+      working-directory: ${{ github.workspace }}
     - name: Download all the dists
       uses: actions/download-artifact@v3
       with:
@@ -79,16 +88,15 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
         gh release create
-        '${{ github.ref_name }}'
+        '${{ github.ref }}'
         --repo '${{ github.repository }}'
-        --notes ""
+        --notes \
+        --title "Release ${{ github.ref }}" \
+        --tag ${{ steps.get_release_name.outputs.release_name }}
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
-      # Upload to GitHub Release using the `gh` CLI.
-      # `dist/` contains the built packages, and the
-      # sigstore-produced signatures and certificates.
       run: >-
         gh release upload
-        '${{ github.ref_name }}' dist/**
+        '${{ steps.get_release_name.outputs.release_name }}' dist/**
         --repo '${{ github.repository }}'

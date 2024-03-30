@@ -1,8 +1,9 @@
+from pathlib import Path
 from typing import Optional
 
 
 class PageLoader:
-    def __init__(self, path: str):
+    def __init__(self, path: str | Path):
         with open(path, "r") as f:
             self._page_raw = f.read()
 
