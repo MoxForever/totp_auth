@@ -67,7 +67,7 @@ jobs:
       id: get_release_name
       run: |
         pip install totp_auth
-        release_name=$(pip show "$library_name" | grep "Version" | awk '{print $2}')
+        release_name=$(pip show "totp_auth" | grep "Version" | awk '{print $2}')
         echo "release_name=$release_name" >> $GITHUB_OUTPUT
         echo "Version: $release_name"
       working-directory: ${{ github.workspace }}
