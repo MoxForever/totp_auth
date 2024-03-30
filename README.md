@@ -2,11 +2,11 @@
 The project was created as a convenient utility for adding TOTP authorization to your site without changing your project.
 
 ### Technology support
-| Technology   | With Header Rewrite | Without Header Rewrite |
-|--------------|---------------------|------------------------|
-| HTTP         | Yes                 | Yes                    |
-| WebSocket    | No                  | Yes                    |
-| EventStream  | No                  | Yes                    |
+| Technology   | With Header Rewrite |
+|--------------|---------------------|
+| HTTP         | Yes                 |
+| WebSocket    | Yes                 |
+| EventStream  | Yes                 |
 
 ### TODO List
 - [ ] Create web interface for configuration

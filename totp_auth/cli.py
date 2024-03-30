@@ -8,7 +8,7 @@ from typing import Optional
 
 import pyotp
 
-from totp_auth.classes.db_config import AppConfig, Server, User, Database
+from totp_auth.classes.db_config import AppConfig, Server, User, HeaderRewrite, Database
 from totp_auth.server import start_server_async
 from totp_auth.utils import parse_host_port
 
@@ -138,6 +138,53 @@ async def server_cli(args: argparse.Namespace, config: AppConfig):
     return True
 
 
+async def headers_cli(args: argparse.Namespace, config: AppConfig):
+    if args.header == "ls":
+        server = config.servers.get(args.server)
+        if server is None or server.id is None:
+            print("Invalid server")
+        else:
+            if len(server.headers_rewrite) > 0:
+                for header in server.headers_rewrite.values():
+                    print(f"{header.header} - {header.value}")
+            else:
+                print("No headers rewrite")
+
+    elif args.header == "create":
+        server = config.servers.get(args.server)
+        if server is None or server.id is None:
+            print("Invalid server")
+        else:
+            header = HeaderRewrite(
+                id=None,
+                value=args.value,
+                header=args.header_data,
+                server=server,
+                app_config=config,
+            )
+
+            server.headers_rewrite[-1] = header
+            await config.save()
+            print(f"Rewrite {header.header}:{header.value} success")
+
+    elif args.header == "delete":
+        server = config.servers.get(args.server)
+        if server is None or server.id is None:
+            print("Invalid server")
+        else:
+            for key, header in server.headers_rewrite.items():
+                if header.header == args.header_data:
+                    del server.headers_rewrite[key]
+                    await config.save()
+                    break
+            print(f"Rewrite {header.header}:{header.value} success")
+
+    else:
+        return False
+
+    return True
+
+
 async def reset_token(config: AppConfig):
     config.secret_token = secrets.token_hex(16)
     await config.save()
@@ -159,6 +206,7 @@ def get_args() -> argparse.Namespace:
     subparsers.add_parser("users", help="Alias for 'user ls'").set_defaults(
         command="user", user="ls"
     )
+    parser_header = subparsers.add_parser("header", help="Users settings")
 
     # Server
     server_subparsers = parser_server.add_subparsers(
@@ -183,7 +231,7 @@ def get_args() -> argparse.Namespace:
     server_delete.add_argument("id", type=int, help="Server id")
 
     # User
-    users_subparsers = parser_user.add_subparsers(dest="user", help="Servers config")
+    users_subparsers = parser_user.add_subparsers(dest="user", help="Users config")
     users_subparsers.add_parser("ls", help="List all users")
     user_create = users_subparsers.add_parser("create", help="New user")
     user_delete = users_subparsers.add_parser("delete", help="Delete user")
@@ -195,6 +243,23 @@ def get_args() -> argparse.Namespace:
     user_access.add_argument("user_data", type=str, help="Id/username")
     user_access.add_argument("server", type=int, help="Server id")
     user_access.add_argument("state", type=str, help="true/false access to server")
+
+    # Headers
+    headers_subparser = parser_header.add_subparsers(
+        dest="header", help="Headers config"
+    )
+    header_ls = headers_subparser.add_parser("ls", help="List all headers")
+    header_create = headers_subparser.add_parser("create", help="Create new header")
+    header_delete = headers_subparser.add_parser("delete", help="Delete header")
+
+    header_ls.add_argument("server", type=int, help="Server id")
+
+    header_create.add_argument("server", type=int, help="Server id")
+    header_create.add_argument("header_data", type=str, help="Header name")
+    header_create.add_argument("value", type=str, help="Header value")
+
+    header_delete.add_argument("server", type=int, help="Server id")
+    header_delete.add_argument("header_data", type=str, help="Header name")
 
     return parser.parse_args()
 
@@ -217,6 +282,8 @@ async def cli():
             executed = await server_cli(args, config)
         elif args.command == "user":
             executed = await user_cli(args, config)
+        elif args.command == "header":
+            executed = await headers_cli(args, config)
 
         if not executed:
             return print("Unknown command, use -h for help")
