@@ -89,9 +89,8 @@ jobs:
         gh release create
         '${{ steps.get_release_name.outputs.release_name }}'
         --repo '${{ github.repository }}'
-        --notes "New release" 
+        --notes 'New release'
         --title 'Release ${{ steps.get_release_name.outputs.release_name }}'
-        --tag ${{ steps.get_release_name.outputs.release_name }}
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
