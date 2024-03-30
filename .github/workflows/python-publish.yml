@@ -87,7 +87,7 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
         gh release create
-        '${{ steps.get_release_name.outputs.release_name }}'
+        '${{ github.ref_name }}'
         --repo '${{ github.repository }}'
         --notes \
         --title "Release ${{ steps.get_release_name.outputs.release_name }}" \
