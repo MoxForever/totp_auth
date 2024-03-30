@@ -11,7 +11,7 @@ The project was created as a convenient utility for adding TOTP authorization to
 ### TODO List
 - [ ] Create web interface for configuration
 - [ ] Light-weight version with 1 rewrite for implementing in docker containers
-- [ ] Migrate from .ini config to sqlite
+- [x] Migrate from .ini config to sqlite
 - [ ] Add classic password support
 - [ ] Rate limits for protect of bruteforce
 - [ ] Login page customization

@@ -63,47 +63,37 @@ class AppConfig:
 class Database:
     def __init__(self, db_path: str | Path):
         self.db_path = db_path
-        self.connection = None
-
-    async def connect(self) -> None:
-        self.connection = await aiosqlite.connect(self.db_path)
 
     async def migrate(self) -> None:
-        async with self.connection.cursor() as cursor:
+        async with aiosqlite.connect(self.db_path) as db:
             migrations_dir = Path(__file__).parent.parent / "migrations"
             with open(migrations_dir / "_default.sql", "r") as f:
-                await cursor.executescript(f.read())
+                await db.executescript(f.read())
 
             for i in os.listdir(migrations_dir):
                 if i.startswith("_"):
                     continue
 
-                await cursor.execute(
+                cursor = await db.execute(
                     "SELECT count(1) FROM migrations WHERE name = ?", (i,)
                 )
                 data = await cursor.fetchone()
                 if not (data and data[0] > 0):
                     with open(migrations_dir / i, "r") as f:
-                        await cursor.executescript(f.read())
-                        await cursor.execute("INSERT INTO migrations VALUES (?)", (i,))
-            await self.connection.commit()
-
-    async def close(self) -> None:
-        if self.connection:
-            await self.connection.close()
+                        await db.executescript(f.read())
+                        await db.execute("INSERT INTO migrations VALUES (?)", (i,))
+            await db.commit()
 
     async def get_config(self) -> AppConfig:
-        async with self.connection.cursor() as cursor:
+        async with aiosqlite.connect(self.db_path) as db:
             # AppConfig fetch
-            await cursor.execute("SELECT * FROM app_config")
+            cursor = await db.execute("SELECT * FROM app_config")
 
             row = await cursor.fetchone()
             if row is None:
                 secret_token = secrets.token_hex(16)
-                await cursor.execute(
-                    "INSERT INTO app_config VALUES (?)", (secret_token,)
-                )
-                await self.connection.commit()
+                await db.execute("INSERT INTO app_config VALUES (?)", (secret_token,))
+                await db.commit()
             else:
                 secret_token = row[0]
 
@@ -113,7 +103,7 @@ class Database:
 
             # Servers fetch
             servers = {}
-            await cursor.execute("SELECT * FROM servers")
+            cursor = await db.execute("SELECT * FROM servers")
             for i in await cursor.fetchall():
                 server = Server(
                     *i,
@@ -125,7 +115,7 @@ class Database:
 
             # Users fetch
             users = {}
-            await cursor.execute("SELECT * FROM users")
+            cursor = await db.execute("SELECT * FROM users")
             for i in await cursor.fetchall():
                 user = User(*i, app_config=app_config, access_to_servers={})
                 users[user.id] = user
@@ -135,7 +125,7 @@ class Database:
 
             # Fetch servers-users relation
             users_to_server: dict[int, list[int]] = {}
-            await cursor.execute("SELECT * FROM users_access")
+            cursor = await db.execute("SELECT * FROM users_access")
             for i in await cursor.fetchall():
                 if i[1] in users_to_server:
                     users_to_server[i[1]].append(i[0])
@@ -152,15 +142,15 @@ class Database:
 
             # Filling empty fields
             for user in app_config.users.values():
-                user.access_to_servers = [servers[i] for i in servers_to_user[user.id]]
+                user.access_to_servers = [servers[i] for i in servers_to_user.get(user.id, [])]
 
             for server in app_config.servers.values():
                 server.users_with_access = [
-                    users[i] for i in users_to_server[server.id]
+                    users[i] for i in users_to_server.get(server.id, [])
                 ]
 
             # Headers rewrite fill
-            await cursor.execute("SELECT * FROM headers_rewrite")
+            cursor = await db.execute("SELECT * FROM headers_rewrite")
             for rewrite_rule in await cursor.fetchall():
                 rule = HeaderRewrite(
                     *rewrite_rule[:-1],
@@ -172,16 +162,16 @@ class Database:
         return app_config
 
     async def save_app_config(self, config: AppConfig) -> None:
-        async with self.connection.cursor() as cursor:
+        async with aiosqlite.connect(self.db_path) as db:
             # appconfig save
-            await cursor.execute(
+            await db.execute(
                 "UPDATE app_config SET secret_token = ?", (config.secret_token,)
             )
 
             # users save
-            await cursor.execute("SELECT id FROM users")
+            cursor = await db.execute("SELECT id FROM users")
             db_users_ids: set[int] = {i[0] for i in await cursor.fetchall()}
-            for key, user in config.users.items():
+            for key, user in list(config.users.items()):
                 if user.id is None:
                     await cursor.execute(
                         "INSERT INTO users (username, totp_secret) VALUES "
@@ -203,16 +193,16 @@ class Database:
                     )
 
             for user_id in db_users_ids:
-                await cursor.execute("DELETE FROM users WHERE id = ?", (user_id,))
+                await db.execute("DELETE FROM users WHERE id = ?", (user_id,))
 
             # servers save
-            await cursor.execute("SELECT id FROM servers")
+            cursor = await db.execute("SELECT id FROM servers")
             db_servers_ids: set[int] = {i[0] for i in await cursor.fetchall()}
-            for key, server in config.servers.items():
+            for key, server in list(config.servers.items()):
                 if server.id is None:
                     await cursor.execute(
                         "INSERT INTO servers (listen_host, listen_port, "
-                        "rewrite_host, rewrite_port) VALUES (?, ?) RETURNING id",
+                        "rewrite_host, rewrite_port) VALUES (?, ?, ?, ?) RETURNING id",
                         (
                             server.listen_host,
                             server.listen_port,
@@ -242,11 +232,11 @@ class Database:
                     )
 
             for server_id in db_servers_ids:
-                await cursor.execute("DELETE FROM servers WHERE id = ?", (server_id,))
+                await db.execute("DELETE FROM servers WHERE id = ?", (server_id,))
 
             # headers rewrite
 
-            await cursor.execute("SELECT id FROM headers_rewrite")
+            cursor = await db.execute("SELECT id FROM headers_rewrite")
             db_headers_ids: set[int] = {i[0] for i in await cursor.fetchall()}
             for server in config.servers.values():
                 for key, header in server.headers_rewrite.items():
@@ -272,4 +262,6 @@ class Database:
                         )
 
             for header_id in db_headers_ids:
-                await cursor.execute("DELETE FROM servers WHERE id = ?", (server_id,))
+                await db.execute("DELETE FROM servers WHERE id = ?", (server_id,))
+
+            await db.commit()

@@ -4,16 +4,58 @@ from contextlib import suppress
 from pathlib import Path
 import os
 import secrets
+from typing import Optional
 
 import pyotp
 
-from totp_auth.classes.db_config import AppConfig, Server, Database
+from totp_auth.classes.db_config import AppConfig, Server, User, Database
 from totp_auth.server import start_server_async
 from totp_auth.utils import parse_host_port
 
 
+def user_picker(data: str, config: AppConfig) -> Optional[User]:
+    if data.isnumeric():
+        return config.users.get(int(data))
+    else:
+        for i in config.users.values():
+            if i.username == data:
+                return i
+        return None
+
+
 async def user_cli(args: argparse.Namespace, config: AppConfig):
-    raise NotImplemented("Not ready yet")
+    if args.user == "ls":
+        if len(config.users) > 0:
+            for i in config.users.values():
+                print(f"{i.id}: {i.username}")
+        else:
+            print("No users configured")
+    elif args.user == "create":
+        user = User(
+            id=None,
+            username=args.username,
+            _totp_secret=pyotp.random_base32(),
+            app_config=config,
+            access_to_servers={},
+        )
+        print(f"Your TOTP secret: {user._totp_secret}")
+        while True:
+            code = input("Write code from your 2fa app for confirmation\n")
+            if user.totp.verify(code):
+                break
+        config.users[-1] = user
+        await config.save()
+    elif args.user == "delete":
+        user = user_picker(args.user_data, config)
+        if user and user.id:
+            del config.users[user.id]
+            await config.save()
+            print(f"User {user.id}:{user.username} deleted")
+        else:
+            print(f"User {args.user_data} not found")
+    else:
+        return False
+    return True
 
 
 async def server_cli(args: argparse.Namespace, config: AppConfig):
@@ -40,7 +82,6 @@ async def server_cli(args: argparse.Namespace, config: AppConfig):
         )
         config.servers[-1] = server
         await config.save()
-
         print(f"Server {server.id} created")
 
     elif args.server == "update":
@@ -56,13 +97,11 @@ async def server_cli(args: argparse.Namespace, config: AppConfig):
             server.rewrite_port = rewrite_port
 
         await config.save()
-
         print(f"Server {server.id} updated")
 
     elif args.server == "delete":
         del config.servers[args.id]
         await config.save()
-
         print(f"Server {args.id} deleted")
 
     else:
@@ -78,22 +117,20 @@ async def reset_token(config: AppConfig):
     return True
 
 
-async def cli():
-    cfg_path = Path.home() / ".config" / "totp-auth"
-    os.makedirs(cfg_path, exist_ok=True)
-    db = Database(cfg_path / "config.sqlite")
-    await db.connect()
-    await db.migrate()
-
-    config = await db.get_config()
-
+def get_args() -> argparse.Namespace:
     # Root
     parser = argparse.ArgumentParser(description="Reverse proxy with TOTP auth")
     subparsers = parser.add_subparsers(dest="command", help="Available commands")
     subparsers.add_parser("run", help="Start the server")
     subparsers.add_parser("reset_token", help="Reset secret token")
     parser_server = subparsers.add_parser("server", help="Servers settings")
+    subparsers.add_parser("servers", help="Alias for 'server ls'").set_defaults(
+        command="server", server="ls"
+    )
     parser_user = subparsers.add_parser("user", help="Users settings")
+    subparsers.add_parser("users", help="Alias for 'user ls'").set_defaults(
+        command="user", user="ls"
+    )
 
     # Server
     server_subparsers = parser_server.add_subparsers(
@@ -119,11 +156,30 @@ async def cli():
 
     # User
     users_subparsers = parser_user.add_subparsers(dest="user", help="Servers config")
-    users_subparsers.add_parser("create", help="New server")
-    users_subparsers.add_parser("delete", help="Delete user")
+    users_subparsers.add_parser("ls", help="List all users")
+    user_create = users_subparsers.add_parser("create", help="New user")
+    user_delete = users_subparsers.add_parser("delete", help="Delete user")
+    user_access = users_subparsers.add_parser("access", help="Give access to server")
 
-    args = parser.parse_args()
+    user_create.add_argument("username", help="User username")
+    user_delete.add_argument("user_data", help="Id/username")
+
+    user_access.add_argument("user_data", help="Id/username")
+    user_access.add_argument("server", help="Server id")
+    user_access.add_argument("state", help="on/off access to server")
+
+    return parser.parse_args()
+
+
+async def cli():
     with suppress(KeyboardInterrupt):
+        cfg_path = Path.home() / ".config" / "totp-auth"
+        os.makedirs(cfg_path, exist_ok=True)
+        db = Database(cfg_path / "config.sqlite")
+        await db.migrate()
+        config = await db.get_config()
+
+        args = get_args()
         executed = False
         if args.command == "run":
             executed = await start_server_async(config)

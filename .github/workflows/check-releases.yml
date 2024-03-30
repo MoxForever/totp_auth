@@ -1,0 +1,37 @@
+name: Check Version on Dev Branch
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  check_version:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Install dependencies
+        run: >-
+          python -m pip install --upgrade pip
+          pip install poetry
+
+      - name: Check if Version Exists
+        run: >-
+          current_version=$(poetry version | awk '{print $2}')
+          echo "Current version: $current_version"
+          released_version=$(curl -s "https://api.github.com/repos/{owner}/{repo}/releases/tags/v$current_version" | jq -r '.name')
+          echo "Released version: $released_version"
+          if [ "$current_version" = "$released_version" ]; then
+            echo "Version $current_version is already released."
+            exit 1
+          else
+            echo "Version $current_version is not released yet."
+          fi

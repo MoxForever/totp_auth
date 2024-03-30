@@ -113,9 +113,7 @@ async def start_server_async(config: AppConfig) -> bool:
             i.listen_port,
         )
 
-        servers_data.append(
-            f"{i.listen_host:i.listen_port} -> {i.rewrite_host:i.rewrite_port}"
-        )
+        servers_data.append(f"{i.listen} -> {i.rewrite}")
 
     print("Server started!\n" + "\n".join(servers_data))
     await asyncio.Future()
