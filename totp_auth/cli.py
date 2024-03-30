@@ -30,6 +30,7 @@ async def user_cli(args: argparse.Namespace, config: AppConfig):
                 print(f"{i.id}: {i.username}")
         else:
             print("No users configured")
+
     elif args.user == "create":
         user = User(
             id=None,
@@ -38,21 +39,48 @@ async def user_cli(args: argparse.Namespace, config: AppConfig):
             app_config=config,
             access_to_servers={},
         )
+
         print(f"Your TOTP secret: {user._totp_secret}")
         while True:
             code = input("Write code from your 2fa app for confirmation\n")
             if user.totp.verify(code):
                 break
+
         config.users[-1] = user
         await config.save()
+
     elif args.user == "delete":
         user = user_picker(args.user_data, config)
+
         if user and user.id:
             del config.users[user.id]
             await config.save()
             print(f"User {user.id}:{user.username} deleted")
         else:
             print(f"User {args.user_data} not found")
+
+    elif args.user == "access":
+        user = user_picker(args.user_data, config)
+        server = config.servers.get(args.server)
+        access = args.state in ["true", "t"]
+
+        if user is None or user.id is None:
+            print("User incorrect")
+        elif server is None or server.id is None:
+            print("Server incorrect")
+        else:
+            if access:
+                user.access_to_servers[server.id] = server
+                server.users_with_access[user.id] = user
+            else:
+                del user.access_to_servers[server.id]
+                del server.users_with_access[user.id]
+            await config.save()
+            if access:
+                print("Access granted")
+            else:
+                print("Access rewoked")
+
     else:
         return False
     return True
@@ -141,18 +169,18 @@ def get_args() -> argparse.Namespace:
     server_update = server_subparsers.add_parser("update", help="Update server")
     server_delete = server_subparsers.add_parser("delete", help="Delete server")
 
-    server_create.add_argument("listen", help="host[:port] format")
-    server_create.add_argument("rewrite", help="host[:port] format")
+    server_create.add_argument("listen", type=str, help="host[:port] format")
+    server_create.add_argument("rewrite", type=str, help="host[:port] format")
 
-    server_update.add_argument("id", help="Server id")
+    server_update.add_argument("id", type=int, help="Server id")
     server_update.add_argument(
-        "-l", "--listen", default=None, help="host[:port] format"
+        "-l", "--listen", type=str, default=None, help="host[:port] format"
     )
     server_update.add_argument(
-        "-r", "--rewrite", default=None, help="host[:port] format"
+        "-r", "--rewrite", type=str, default=None, help="host[:port] format"
     )
 
-    server_delete.add_argument("id", help="Server id")
+    server_delete.add_argument("id", type=int, help="Server id")
 
     # User
     users_subparsers = parser_user.add_subparsers(dest="user", help="Servers config")
@@ -161,12 +189,12 @@ def get_args() -> argparse.Namespace:
     user_delete = users_subparsers.add_parser("delete", help="Delete user")
     user_access = users_subparsers.add_parser("access", help="Give access to server")
 
-    user_create.add_argument("username", help="User username")
-    user_delete.add_argument("user_data", help="Id/username")
+    user_create.add_argument("username", type=str, help="User username")
+    user_delete.add_argument("user_data", type=str, help="Id/username")
 
-    user_access.add_argument("user_data", help="Id/username")
-    user_access.add_argument("server", help="Server id")
-    user_access.add_argument("state", help="on/off access to server")
+    user_access.add_argument("user_data", type=str, help="Id/username")
+    user_access.add_argument("server", type=int, help="Server id")
+    user_access.add_argument("state", type=str, help="true/false access to server")
 
     return parser.parse_args()
 

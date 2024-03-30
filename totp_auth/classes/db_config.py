@@ -142,12 +142,14 @@ class Database:
 
             # Filling empty fields
             for user in app_config.users.values():
-                user.access_to_servers = [servers[i] for i in servers_to_user.get(user.id, [])]
+                user.access_to_servers = {
+                    i: servers[i] for i in servers_to_user.get(user.id, [])
+                }
 
             for server in app_config.servers.values():
-                server.users_with_access = [
-                    users[i] for i in users_to_server.get(server.id, [])
-                ]
+                server.users_with_access = {
+                    i: users[i] for i in users_to_server.get(server.id, [])
+                }
 
             # Headers rewrite fill
             cursor = await db.execute("SELECT * FROM headers_rewrite")
@@ -263,5 +265,31 @@ class Database:
 
             for header_id in db_headers_ids:
                 await db.execute("DELETE FROM servers WHERE id = ?", (server_id,))
+
+            cursor = await db.execute("SELECT * FROM users_access")
+            db_servers_access: dict[int, set[int]] = {}
+            for i in await cursor.fetchall():
+                if i[1] in db_servers_access:
+                    db_servers_access[i[1]].add(i[0])
+                else:
+                    db_servers_access[i[1]] = set([i[0]])
+
+            for server_id in config.servers.keys():
+                for user_id, user in server.users_with_access.items():
+                    if user_id in db_servers_access.get(server_id, set()):
+                        db_servers_access[server_id].remove(user_id)
+                    else:
+                        await db.execute(
+                            "INSERT INTO users_access (user_id, server_id) "
+                            "VALUES (?, ?)",
+                            (user_id, server_id),
+                        )
+
+            for server_id, users in db_servers_access.items():
+                for user_id in users:
+                    await db.execute(
+                        "DELETE FROM users_access WHERE user_id = ? AND server_id = ?",
+                        (user_id, server_id),
+                    )
 
             await db.commit()
