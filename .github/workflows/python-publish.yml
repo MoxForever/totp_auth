@@ -68,7 +68,8 @@ jobs:
       run: |
         pip install totp_auth
         release_name=$(pip show "$library_name" | grep "Version" | awk '{print $2}')
-        echo "::set-output name=release_name::$release_name"
+        echo "release_name=$release_name" >> $GITHUB_OUTPUT
+        echo "Version: $release_name"
       working-directory: ${{ github.workspace }}
     - name: Download all the dists
       uses: actions/download-artifact@v3
