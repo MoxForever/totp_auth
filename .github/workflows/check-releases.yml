@@ -21,15 +21,12 @@ jobs:
       - name: Install dependencies
         run: |
           pip install .
-
-      - name: Install toml-cli
-        run: |
           pip install toml-cli
 
       - name: Get release name from pyproject.toml
         id: get_release_name
         run: |
-          release_name=$(toml get pyproject.toml tool.poetry.name)
+          release_name=$(toml get --toml-path pyproject.toml project.version)
           echo "::set-output name=release_name::$release_name"
         working-directory: ${{ github.workspace }}
 
