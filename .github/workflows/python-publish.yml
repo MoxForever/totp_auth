@@ -65,11 +65,12 @@ jobs:
     steps:
     - name: Install toml-cli
       run: |
-        pip install toml-cli
+        sudo apt-get update
+        sudo apt-get install -y toml-cli
     - name: Get release name from pyproject.toml
       id: get_release_name
       run: |
-        release_name=$(toml get --toml-path pyproject.toml project.version)
+        release_name=$(toml get pyproject.toml tool.poetry.name)
         echo "::set-output name=release_name::$release_name"
       working-directory: ${{ github.workspace }}
     - name: Download all the dists
@@ -88,10 +89,10 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
         gh release create
-        '${{ github.ref }}'
+        '${{ steps.get_release_name.outputs.release_name }}'
         --repo '${{ github.repository }}'
         --notes \
-        --title "Release ${{ github.ref }}" \
+        --title "Release ${{ steps.get_release_name.outputs.release_name }}" \
         --tag ${{ steps.get_release_name.outputs.release_name }}
     - name: Upload artifact signatures to GitHub Release
       env:
