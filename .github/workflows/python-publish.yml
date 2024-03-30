@@ -87,10 +87,10 @@ jobs:
         GITHUB_TOKEN: ${{ github.token }}
       run: >-
         gh release create
-        '${{ github.ref_name }}'
+        '${{ steps.get_release_name.outputs.release_name }}'
         --repo '${{ github.repository }}'
-        --notes \
-        --title "Release ${{ steps.get_release_name.outputs.release_name }}" \
+        --notes "New release" \
+        --title 'Release ${{ steps.get_release_name.outputs.release_name }}' \
         --tag ${{ steps.get_release_name.outputs.release_name }}
     - name: Upload artifact signatures to GitHub Release
       env:
