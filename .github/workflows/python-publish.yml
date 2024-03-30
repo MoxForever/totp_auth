@@ -92,7 +92,7 @@ jobs:
         --repo '${{ github.repository }}'
         --notes \
         --title "Release ${{ github.ref }}" \
-        --tag ${{ github.ref }}
+        --tag ${{ steps.get_release_name.outputs.release_name }}
     - name: Upload artifact signatures to GitHub Release
       env:
         GITHUB_TOKEN: ${{ github.token }}
