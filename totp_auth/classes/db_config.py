@@ -102,7 +102,7 @@ class Database:
             )
 
             # Servers fetch
-            servers = {}
+            servers: dict[int, Server] = {}
             cursor = await db.execute("SELECT * FROM servers")
             for i in await cursor.fetchall():
                 server = Server(
@@ -111,14 +111,16 @@ class Database:
                     users_with_access={},
                     headers_rewrite={},
                 )
-                servers[server.id] = server
+                if server.id:
+                    servers[server.id] = server
 
             # Users fetch
-            users = {}
+            users: dict[int, User] = {}
             cursor = await db.execute("SELECT * FROM users")
             for i in await cursor.fetchall():
                 user = User(*i, app_config=app_config, access_to_servers={})
-                users[user.id] = user
+                if user.id:
+                    users[user.id] = user
 
             app_config.users = users
             app_config.servers = servers
@@ -142,14 +144,16 @@ class Database:
 
             # Filling empty fields
             for user in app_config.users.values():
-                user.access_to_servers = {
-                    i: servers[i] for i in servers_to_user.get(user.id, [])
-                }
+                if user.id:
+                    user.access_to_servers = {
+                        i: servers[i] for i in servers_to_user.get(user.id, [])
+                    }
 
             for server in app_config.servers.values():
-                server.users_with_access = {
-                    i: users[i] for i in users_to_server.get(server.id, [])
-                }
+                if server.id:
+                    server.users_with_access = {
+                        i: users[i] for i in users_to_server.get(server.id, [])
+                    }
 
             # Headers rewrite fill
             cursor = await db.execute("SELECT * FROM headers_rewrite")
@@ -159,7 +163,8 @@ class Database:
                     server=servers[rewrite_rule[-1]],
                     app_config=app_config,
                 )
-                servers[rule.server.id][rule.id] = rule
+                if rule.server.id and rule.id:
+                    servers[rule.server.id].headers_rewrite[rule.id] = rule
 
         return app_config
 
@@ -241,7 +246,7 @@ class Database:
             cursor = await db.execute("SELECT id FROM headers_rewrite")
             db_headers_ids: set[int] = {i[0] for i in await cursor.fetchall()}
             for server in config.servers.values():
-                for key, header in server.headers_rewrite.items():
+                for key, header in list(server.headers_rewrite.items()):
                     if header.id is None:
                         await cursor.execute(
                             "INSERT INTO headers_rewrite (value, header, "
@@ -264,7 +269,9 @@ class Database:
                         )
 
             for header_id in db_headers_ids:
-                await db.execute("DELETE FROM servers WHERE id = ?", (server_id,))
+                await db.execute(
+                    "DELETE FROM headers_rewrite WHERE id = ?", (header_id,)
+                )
 
             cursor = await db.execute("SELECT * FROM users_access")
             db_servers_access: dict[int, set[int]] = {}

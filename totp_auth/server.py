@@ -1,29 +1,42 @@
 import asyncio
+import logging
 from pathlib import Path
-from typing import Any, Coroutine
+import traceback
 
 from totp_auth.classes import AppConfig, Server, HTTPRequest, PageLoader
 from totp_auth.cookie import create_cookie, get_cookie_data
 
+import tracemalloc
 
-def redirect_answer(username: str, config: AppConfig):
+tracemalloc.start()
+
+logging.basicConfig(level=logging.DEBUG)
+
+
+logger = logging.getLogger("proxy_server")
+
+
+def redirect_answer(user_id: int, config: AppConfig):
     return (
         b"HTTP/1.1 302 Found\r\nLocation: /\r\nSet-Cookie: totp_auth="
-        + create_cookie(username, config).encode("utf-8")
+        + create_cookie(str(user_id), config).encode("utf-8")
         + b"\r\n\r\n"
     )
 
 
-async def receive_request(reader):
+async def receive_request(reader: asyncio.StreamReader):
     while True:
-        yield await reader.read(4096)
+        data = await reader.read(4096)
+        if len(data) == 0:
+            return
+        yield data
 
 
 async def forward_to_client(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
     while True:
         data = await reader.read(4096)
-        if not data:
-            break
+        if len(data) == 0:
+            return
         writer.write(data)
         await writer.drain()
 
@@ -31,14 +44,22 @@ async def forward_to_client(reader: asyncio.StreamReader, writer: asyncio.Stream
 async def forward_from_client(
     reader: asyncio.StreamReader, writer: asyncio.StreamWriter, server: Server
 ):
-    if len(server.headers_rewrite) > 0:
-        while True:
-            request = await HTTPRequest.parse(receive_request(reader))
-            for rewrite_header in server.headers_rewrite.values():
-                request.headers[rewrite_header.header] = rewrite_header.value
-            writer.write(request.to_bytes())
-    else:
-        await forward_to_client(reader, writer)
+    try:
+        if len(server.headers_rewrite) > 0:
+            while True:
+                request = await HTTPRequest.parse(receive_request(reader))
+                if request:
+                    for rewrite_header in server.headers_rewrite.values():
+                        request.headers[rewrite_header.header] = rewrite_header.value
+                    writer.write(request.to_bytes())
+                else:
+                    break
+        else:
+            await forward_to_client(reader, writer)
+    finally:
+        user_host, user_port = writer.get_extra_info("peername")
+        logger.info(f"User disconnected {user_host}:{user_port}")
+        return writer.close()
 
 
 async def proxy_request(
@@ -54,10 +75,20 @@ async def proxy_request(
         request.headers[rewrite_header.header] = rewrite_header.value
     remote_writer.write(request.to_bytes())
 
-    await asyncio.gather(
-        forward_from_client(local_reader, remote_writer, server),
-        forward_to_client(remote_reader, local_writer),
-    )
+    if request.headers.get("Upgrade") == "websocket":
+        await asyncio.gather(
+            forward_to_client(local_reader, remote_writer),
+            forward_to_client(remote_reader, local_writer),
+        )
+    else:
+        await asyncio.gather(
+            forward_from_client(local_reader, remote_writer, server),
+            forward_to_client(remote_reader, local_writer),
+        )
+
+    local_writer.close()
+    remote_writer.close()
+    logger.info(f"Connection closed")
 
 
 async def handle_client(
@@ -67,37 +98,45 @@ async def handle_client(
     config: AppConfig,
     page_loader: PageLoader,
 ) -> None:
+    user_host, user_port = local_writer.get_extra_info("peername")
+    logger.info(f"New connection from {user_host}:{user_port}")
     request = await HTTPRequest.parse(receive_request(local_reader))
-    cookies = request.get_cookies()
+    if request is None:
+        return local_writer.close()
 
+    cookies = request.get_cookies()
     cookie_data = get_cookie_data(cookies.get("totp_auth", ""), config)
     if cookie_data and int(cookie_data) in server.users_with_access.keys():
         await proxy_request(request, local_reader, local_writer, server)
     else:
         if request.method == "POST":
             form_data = dict([i.split("=", 1) for i in request.body.split("&")])
-            username, totp = form_data.get("username").lower(), form_data.get("totp")
+            username, totp = form_data.get("username"), form_data.get("totp")
 
-            correct = False
+            user_id = None
             if username and totp:
                 for i in server.users_with_access.values():
-                    if username == i.username:
-                        if i.totp.verify(totp):
-                            correct = True
+                    if username == i.username and i.totp.verify(totp):
+                        user_id = i.id
+                        break
 
-            if correct:
-                local_writer.write(redirect_answer(username, config))
+            if user_id is not None:
+                local_writer.write(redirect_answer(user_id, config))
             else:
                 local_writer.write(page_loader.render_response("Incorrect data"))
         else:
             local_writer.write(page_loader.render_response())
 
     local_writer.close()
+    logger.info(f"Connection ended {user_host}:{user_port}")
 
 
 def handle_client_decorator(config: AppConfig, server: Server, page_loader: PageLoader):
     async def handler(reader: asyncio.StreamReader, writer: asyncio.StreamWriter):
-        await handle_client(reader, writer, server, config, page_loader)
+        try:
+            await handle_client(reader, writer, server, config, page_loader)
+        except Exception as ex:
+            traceback.print_exception(ex)
 
     return handler
 
@@ -122,4 +161,5 @@ async def start_server_async(config: AppConfig) -> bool:
 
 
 def start_server(config: AppConfig) -> bool:
-    return asyncio.run(start_server_async(config))
+    loop = asyncio.new_event_loop()
+    return loop.run_until_complete(start_server_async(config))

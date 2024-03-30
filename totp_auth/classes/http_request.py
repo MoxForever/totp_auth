@@ -1,4 +1,4 @@
-from typing import AsyncGenerator
+from typing import AsyncGenerator, Optional
 
 
 class HTTPRequest:
@@ -39,7 +39,7 @@ class HTTPRequest:
         return raw.encode("utf-8")
 
     @staticmethod
-    async def parse(data: AsyncGenerator[bytes, None]) -> "HTTPRequest":
+    async def parse(data: AsyncGenerator[bytes, None]) -> Optional["HTTPRequest"]:
         request_data, body, body_length, headers = None, None, 0, None
 
         raw = ""
@@ -51,15 +51,17 @@ class HTTPRequest:
                 headers, raw = raw.split("\r\n\r\n", 1)
                 headers = dict([i.split(": ") for i in headers.split("\r\n")])
                 body_length = int(headers.get("Content-Length", 0))
-            if len(raw) >= body_length:
+            if request_data is not None and len(raw) >= body_length:
                 body = raw
                 break
 
+        if request_data is None:
+            return None
         if headers is None:
             headers = {}
         if body is None:
             body = ""
-
+        
         method, uri, version = request_data.split(" ")
         return HTTPRequest(
             method=method, uri=uri, version=version, headers=headers, body=body
