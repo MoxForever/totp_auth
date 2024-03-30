@@ -20,7 +20,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python install .
+          pip install .
 
       - name: Install toml-cli
         run: |
