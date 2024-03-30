@@ -35,7 +35,7 @@ jobs:
         run: |
           current_version=${{ steps.get_release_name.outputs.release_name }}
           echo "Current version: $current_version"
-          released_version=$(curl -s "https://api.github.com/repos/{owner}/{repo}/releases/tags/v$current_version" | jq -r '.name')
+          released_version=$(curl -s "https://api.github.com/repos/{owner}/{repo}/releases/tags/$current_version" | jq -r '.name')
           echo "Released version: $released_version"
           if [ "$current_version" = "$released_version" ]; then
             echo "Version $current_version is already released."
