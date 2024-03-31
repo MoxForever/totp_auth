@@ -6,13 +6,6 @@ import traceback
 from totp_auth.classes import AppConfig, Server, HTTPRequest, PageLoader
 from totp_auth.cookie import create_cookie, get_cookie_data
 
-import tracemalloc
-
-tracemalloc.start()
-
-logging.basicConfig(level=logging.DEBUG)
-
-
 logger = logging.getLogger("proxy_server")
 
 
