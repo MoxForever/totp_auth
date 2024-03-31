@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Request root access
+sudo echo "Root access granted"
+
 # Setup dependencies
 apt install python3 python3-venv
 
@@ -9,15 +12,11 @@ VENV_DIR="${PROJECT_DIR}/venv"
 
 # Create project directory
 mkdir -p "$PROJECT_DIR"
-cd "$PROJECT_DIR" || exit
+cd "$PROJECT_DIR"
 
-# Create virtual environment
+# Setup virtual environment
 python3 -m venv "$VENV_DIR"
-
-# Activate virtual environment
 source "$VENV_DIR/bin/activate"
-
-# Install TOTP Auth
 pip install totp-auth
 
 # Create systemd service file
@@ -42,6 +41,5 @@ sudo systemctl daemon-reload
 sudo systemctl enable totp-auth
 sudo systemctl start totp-auth
 
-# Save to PATH
-export PATH="$VENV_DIR/bin:$PATH"
-source ~/.bashrc
+# Symlink for script
+sudo ln -s $VENV_DIR/bin/totp-auth /usr/bin/totp-auth
