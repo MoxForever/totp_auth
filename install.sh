@@ -4,7 +4,7 @@
 sudo echo "Root access granted"
 
 # Setup dependencies
-apt install python3 python3-venv
+sudo apt install python3 python3-venv
 
 # Set variables
 PROJECT_DIR="/home/$(whoami)/.config/"
