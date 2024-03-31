@@ -17,7 +17,7 @@ cd "$PROJECT_DIR"
 # Setup virtual environment
 python3 -m venv "$VENV_DIR"
 source "$VENV_DIR/bin/activate"
-pip install totp-auth
+pip3 install totp-auth
 
 # Create systemd service file
 cat <<EOF | sudo tee /etc/systemd/system/totp-auth.service > /dev/null
