@@ -18,9 +18,18 @@ The project was created as a convenient utility for adding TOTP authorization to
 
 ## Installation
 
+### PIP
+
 Installation from pip is easy:
 ```bash
 pip install totp_auth
+```
+
+### Script
+
+Installs python, pip and setup systemd daemon. Run as the user on whose behalf you will manage.
+```bash
+curl -fsSL https://raw.githubusercontent.com/MoxForever/totp_auth/main/install.sh | sudo bash
 ```
 
 ## Usage
