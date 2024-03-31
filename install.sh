@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install
-apt install python3 pip3
+apt install python3
 pip3 install totp_auth
 
 # Systemd service
