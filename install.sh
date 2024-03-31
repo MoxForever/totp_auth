@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Setup dependencies
+apt install python3 python3-venv
+
 # Set variables
 PROJECT_DIR="/home/$(whoami)/.config/"
 VENV_DIR="${PROJECT_DIR}/venv"
@@ -38,3 +41,7 @@ EOF
 sudo systemctl daemon-reload
 sudo systemctl enable totp-auth
 sudo systemctl start totp-auth
+
+# Save to PATH
+export PATH="$VENV_DIR/bin:$PATH"
+source ~/.bashrc
