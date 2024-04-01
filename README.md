@@ -29,7 +29,7 @@ pip install totp_auth
 
 Installs python, pip and setup systemd daemon. Run as the user on whose behalf you will manage.
 ```bash
-curl -fsSL https://raw.githubusercontent.com/MoxForever/totp_auth/main/install.sh | sudo bash
+curl -fsSL https://raw.githubusercontent.com/MoxForever/totp_auth/main/install.sh | bash
 ```
 
 ## Usage
