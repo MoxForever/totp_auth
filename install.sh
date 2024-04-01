@@ -7,7 +7,7 @@ sudo echo "Root access granted"
 sudo apt install python3 python3-venv
 
 # Set variables
-PROJECT_DIR="/home/$(whoami)/.config/"
+PROJECT_DIR="/home/$(whoami)/.config/totp-auth"
 VENV_DIR="${PROJECT_DIR}/venv"
 
 # Create project directory
