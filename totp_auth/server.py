@@ -50,8 +50,6 @@ async def forward_from_client(
         else:
             await forward_to_client(reader, writer)
     finally:
-        user_host, user_port = writer.get_extra_info("peername")
-        logger.info(f"User disconnected {user_host}:{user_port}")
         return writer.close()
 
 
@@ -91,8 +89,6 @@ async def handle_client(
     config: AppConfig,
     page_loader: PageLoader,
 ) -> None:
-    user_host, user_port = local_writer.get_extra_info("peername")
-    logger.info(f"New connection from {user_host}:{user_port}")
     request = await HTTPRequest.parse(receive_request(local_reader))
     if request is None:
         return local_writer.close()
