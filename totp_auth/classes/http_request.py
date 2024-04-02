@@ -24,7 +24,7 @@ class HTTPRequest:
         self.headers["Content-Length"] = str(len(v))
 
     def get_cookies(self) -> dict[str, str]:
-        cookie_header = self.headers.get("Cookie") | self.headers.get("cookie")
+        cookie_header = self.headers.get("Cookie") or self.headers.get("cookie")
         if cookie_header is None:
             return dict()
         else:
