@@ -8,7 +8,7 @@ from totp_auth.cookie import create_cookie, get_cookie_data
 
 def redirect_answer(user_id: int, config: AppConfig):
     return (
-        b"HTTP/1.1 302 Found\r\nLocation: /\r\nSet-Cookie: totp_auth="
+        b"HTTP/1.1 303 See Other\r\nLocation: /\r\nSet-Cookie: totp_auth="
         + create_cookie(str(user_id), config).encode("utf-8")
         + b"\r\n\r\n"
     )
