@@ -24,10 +24,11 @@ class HTTPRequest:
         self.headers["Content-Length"] = str(len(v))
 
     def get_cookies(self) -> dict[str, str]:
-        if "Cookie" not in self.headers:
+        cookie_header = self.headers.get("Cookie") | self.headers.get("cookie")
+        if cookie_header is None:
             return dict()
         else:
-            return dict([i.split("=", 1) for i in self.headers["Cookie"].split("; ")])
+            return dict([i.split("=", 1) for i in cookie_header.split("; ")])
 
     def to_bytes(self):
         raw = (
