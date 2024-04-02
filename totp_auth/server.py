@@ -1,12 +1,9 @@
 import asyncio
-import logging
 from pathlib import Path
 import traceback
 
 from totp_auth.classes import AppConfig, Server, HTTPRequest, PageLoader
 from totp_auth.cookie import create_cookie, get_cookie_data
-
-logger = logging.getLogger("proxy_server")
 
 
 def redirect_answer(user_id: int, config: AppConfig):
@@ -79,7 +76,6 @@ async def proxy_request(
 
     local_writer.close()
     remote_writer.close()
-    logger.info(f"Connection closed")
 
 
 async def handle_client(
@@ -117,7 +113,6 @@ async def handle_client(
             local_writer.write(page_loader.render_response())
 
     local_writer.close()
-    logger.info(f"Connection ended {user_host}:{user_port}")
 
 
 def handle_client_decorator(config: AppConfig, server: Server, page_loader: PageLoader):
