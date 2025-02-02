@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Log In | Test server</title>
+        <style>/*
+- name: Dark
+*/
+
+:root {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --input-bg-color: #121212;
+    --input-active-bg-color: #333333;
+    --input-text-color: #ffffff;
+
+    --widget-container-bg: #222222;
+
+    --login-button-bg: #6200ea;
+    --login-button-text: #ffffff;
+}</style>
+        <style>* {
+    margin: 0;
+    padding: 0;
+    font-family: Roboto;
+}
+
+input {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 18px;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    appearance: textfield;
+}
+
+input:focus {
+    background-color: var(--input-active-bg-color);
+}
+
+label {
+    user-select: none;
+    padding-left: 4px;
+}
+
+input:focus {
+    border: none;
+    outline: none;
+}
+
+.login {
+    width: 100%;
+}
+
+.login button {
+    background-color: var(--login-button-bg);
+    color: var(--login-button-text);
+    font-size: 24px;
+
+    width: 100%;
+    padding: 8px 16px;
+
+    border: none;
+    border-radius: 8px;
+}
+
+.window {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: var(--bg-color);
+}
+
+.widget-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    padding: 18px;
+    border-radius: 18px;
+
+    background-color: var(--widget-container-bg);
+    color: var(--input-text-color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    user-select: none;
+    font-size: 14px;
+}
+
+.widget-list {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.widget-list .widget-icon {
+    border: none;
+
+    width: 32px;
+    height: 32px;
+}
+
+.selected-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* Widgets styles */
+
+.input-field-numeric-digits {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.input-field-numeric-digits input {
+    width: 10px;
+    caret-color: transparent;
+}
+</style>
+        <script>// Numeric input field
+window.addEventListener('load', function() {
+    let digit_inuputs = document.querySelectorAll('input[data-custom-type="numeric"]');
+
+    digit_inuputs.forEach(function(input) {
+        let digits = input.parentElement
+            .querySelector('.input-field-numeric-digits')
+            .querySelectorAll('input[data-custom-type="numeric-digit"]');
+
+        document.addEventListener("paste", function (e) {
+            if (!input.parentElement.contains(document.activeElement)) return;
+            e.preventDefault();
+            let data = (e.clipboardData || window.clipboardData).getData("text");
+            if (data.length == digits.length && !isNaN(+data)) {
+                for (let i = 0; i < digits.length; i++) {
+                    digits[i].value = data[i];
+                }
+                digits[digits.length - 1].focus();
+            }
+        });
+
+        digits.forEach(function(digit, index) {
+            digit.addEventListener('keydown', function(e) {
+                if (e.ctrlKey) return;
+                e.preventDefault();
+
+                function moveCarret(delta) {
+                    let new_index = index + delta;
+                    if (new_index < 0) {
+                        new_index = digits.length - 1;
+                    } else if (new_index >= digits.length) {
+                        new_index = 0;
+                    }
+                    digits[new_index].focus();
+                }
+
+                if (e.key == "ArrowLeft") {
+                    return moveCarret(-1);
+                } else if (e.key == "ArrowRight") {
+                    return moveCarret(1);
+                } else if (e.key == "Backspace") {
+                    for (let i = digits.length - 1; i >= 0; i--) {
+                        if (digits[i].value != '') {
+                            digits[i].value = '';
+                            digits[Math.max(i-1, 0)].focus();
+                            return;
+                        }
+                    }
+                }
+
+                let number = +e.key;
+                if (isNaN(number)) return;
+
+                digit.value = number;
+                if (index < digits.length - 1) {
+                    digits[index + 1].focus();
+                } else {
+                    digits[0].focus();
+                }
+
+                let full_number = '';
+                for (let i = 0; i < digits.length; i++) {
+                    full_number += digits[i].value;
+                }
+                input.value = full_number;
+            });
+        });
+    });
+});</script>
+    </head>
+    <body>
+        <div class="window">
+            <div class="widget-container">
+                <div class="header">
+                    <h1>Test server</h1>
+                </div>
+                <div class="selected-widget">
+                    <div class="input-field input-field-text">
+                        <label for="login">Login</label>
+                        <input 
+                            type="text"
+                            name="login"
+                            maxlength="64"
+                            required>
+                    </div><div class="input-field input-field-numeric">
+                        <label for="code">Code</label>
+                        <input
+                            type="hidden"
+                            name="code"
+                            data-custom-type="numeric"/>
+                            <div class="input-field-numeric-digits"><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-0"
+                    id="code-0"
+                    min="0" max="9" required/><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-1"
+                    id="code-1"
+                    min="0" max="9" required/><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-2"
+                    id="code-2"
+                    min="0" max="9" required/><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-3"
+                    id="code-3"
+                    min="0" max="9" required/><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-4"
+                    id="code-4"
+                    min="0" max="9" required/><input 
+                    type="number"
+                    data-custom-type="numeric-digit"
+                    name="code-5"
+                    id="code-5"
+                    min="0" max="9" required/></div>
+                    </div>
+                </div>
+                <div class="login">
+                    <button>Log In</button>
+                </div>
+                
+                    <div class="widget-list">
+                        
+                            <a href="#password">Use password</a>
+                        
+                    </div>
+                
+            </div>
+        </div>
+    </body>
+</html>

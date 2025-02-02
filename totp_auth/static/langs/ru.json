@@ -1,0 +1,17 @@
+{
+    "login_page": {
+        "button": "Войти"
+    },
+    "auth_widgets": {
+        "password": {
+            "login": "Логин",
+            "password": "Пароль",
+            "method_button": "Пароль"
+        },
+        "totp": {
+            "login": "Логин",
+            "code": "Код",
+            "method_button": "TOTP код"
+        }
+    }
+}

@@ -1,0 +1,16 @@
+/*
+- name: Dark
+*/
+
+:root {
+    --bg-color: #121212;
+    --text-color: #e0e0e0;
+    --input-bg-color: #121212;
+    --input-active-bg-color: #333333;
+    --input-text-color: #ffffff;
+
+    --widget-container-bg: #222222;
+
+    --login-button-bg: #6200ea;
+    --login-button-text: #ffffff;
+}

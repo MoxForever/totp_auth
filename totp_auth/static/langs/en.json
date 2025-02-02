@@ -1,0 +1,17 @@
+{
+    "login_page": {
+        "button": "Log In"
+    },
+    "auth_widgets": {
+        "password": {
+            "login": "Login",
+            "password": "Password",
+            "method_button": "Use password"
+        },
+        "totp": {
+            "login": "Login",
+            "code": "Code",
+            "method_button": "Use TOTP auth"
+        }
+    }
+}

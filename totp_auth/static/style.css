@@ -1,0 +1,125 @@
+* {
+    margin: 0;
+    padding: 0;
+    font-family: Roboto;
+}
+
+input {
+    background-color: var(--input-bg-color);
+    color: var(--input-text-color);
+    border: none;
+    border-radius: 8px;
+    padding: 12px;
+    font-size: 18px;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+input[type="number"] {
+    appearance: textfield;
+}
+
+input:focus {
+    background-color: var(--input-active-bg-color);
+}
+
+label {
+    user-select: none;
+    padding-left: 4px;
+}
+
+input:focus {
+    border: none;
+    outline: none;
+}
+
+.login {
+    width: 100%;
+}
+
+.login button {
+    background-color: var(--login-button-bg);
+    color: var(--login-button-text);
+    font-size: 24px;
+
+    width: 100%;
+    padding: 8px 16px;
+
+    border: none;
+    border-radius: 8px;
+}
+
+.window {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    width: 100vw;
+    height: 100vh;
+
+    background-color: var(--bg-color);
+}
+
+.widget-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+
+    padding: 18px;
+    border-radius: 18px;
+
+    background-color: var(--widget-container-bg);
+    color: var(--input-text-color);
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.header {
+    user-select: none;
+    font-size: 14px;
+}
+
+.widget-list {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.widget-list .widget-icon {
+    border: none;
+
+    width: 32px;
+    height: 32px;
+}
+
+.selected-widget {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.input-field {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+/* Widgets styles */
+
+.input-field-numeric-digits {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+}
+
+.input-field-numeric-digits input {
+    width: 10px;
+    caret-color: transparent;
+}

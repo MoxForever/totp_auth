@@ -13,6 +13,7 @@ classifiers = [
 ]
 dependencies = [
     "pyotp>=2.9.0",
+    "Jinja2>=3.1.5",
     "aiosqlite>=0.20.0",
 ]
 
@@ -24,4 +25,4 @@ Homepage = "https://github.com/MoxForever/totp_auth"
 Issues = "https://github.com/MoxForever/totp_auth/issues"
 
 [tool.setuptools.package-data]
-totp_auth = ["login.html", "migrations/*.sql"]
+totp_auth = ["static/**"]

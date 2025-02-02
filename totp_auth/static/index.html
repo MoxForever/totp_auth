@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="{{ lang }}">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>{{ _("button") }} | {{ title }}</title>
+        <style>{{ theme | safe }}</style>
+        <style>{{ base_css | safe }}</style>
+        <script>{{ base_js | safe }}</script>
+    </head>
+    <body>
+        <div class="window">
+            <div class="widget-container">
+                <div class="header">
+                    <h1>{{ title }}</h1>
+                </div>
+                <div class="selected-widget">
+                    {{ selected_widget_html | safe }}
+                </div>
+                <div class="login">
+                    <button>{{ _("button") }}</button>
+                </div>
+                {% if another_widgets|length > 0 %}
+                    <div class="widget-list">
+                        {% for widget in another_widgets %}
+                            <a href="#{{ widget.name }}">{{ widget.method_button }}</a>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </body>
+</html>
