@@ -2,8 +2,7 @@ from typing import Literal
 
 from totp_auth.models import AuthWidget
 from totp_auth.models.fields import InputTextField, InputPasswordField
-from totp_auth.utils.errors import InvalidCredentials
-from totp_auth.utils.translator import WidgetLanguage
+from totp_auth.errors import InvalidCredentials
 
 
 class PasswordWidgetData:
@@ -22,3 +21,6 @@ class PasswordWidget(AuthWidget[PasswordWidgetData]):
         if data.login == "admin" and data.password == "admin":
             return True
         raise InvalidCredentials("Invalid credentials")
+
+
+__all__ = ["PasswordWidget"]

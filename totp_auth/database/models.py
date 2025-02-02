@@ -8,4 +8,5 @@ class Server:
     name: str
     theme_name: str
     language: str
-    widgets: list[AuthWidget]
+    widgets: list[str]
+    id: int | None = None

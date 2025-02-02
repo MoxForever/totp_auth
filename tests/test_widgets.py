@@ -1,7 +1,7 @@
 import pytest
 
 from totp_auth.auth_widgets import PasswordWidget, TOTPWidget
-from totp_auth.utils.errors import (
+from totp_auth.errors import (
     InvalidCredentials,
     InvalidFields,
     FieldError,

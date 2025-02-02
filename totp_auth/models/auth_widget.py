@@ -2,8 +2,8 @@ from abc import ABC, abstractmethod
 from types import SimpleNamespace
 from typing import Generic, TypeVar
 
-from totp_auth.utils.translator import WidgetLanguage
-from totp_auth.utils.errors import InvalidFields
+from totp_auth.loaders import WidgetLanguage
+from totp_auth.errors import InvalidFields
 
 from .fields import Field
 

@@ -9,10 +9,10 @@ class Theme:
 
 
 class ThemesLoader:
-    def __init__(self, *themes_dirs: str):
+    def __init__(self, *themes_dirs: Path):
         self._themes: dict[str, Theme] = {}
         for themes_dir in themes_dirs:
-            for theme_src in Path(themes_dir).glob("*.css"):
+            for theme_src in themes_dir.glob("*.css"):
                 theme = self._load_theme(theme_src)
                 self._themes[theme.name] = theme
 

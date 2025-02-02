@@ -2,8 +2,8 @@ import re
 from types import NoneType
 from typing import Generic, Protocol, TypeVar
 
-from totp_auth.utils.errors import FieldError, FieldErrorList
-from totp_auth.utils.translator import WidgetLanguage
+from totp_auth.errors import FieldError, FieldErrorList
+from totp_auth.loaders import WidgetLanguage
 
 
 ReturnType = TypeVar("ReturnType")

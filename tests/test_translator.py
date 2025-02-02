@@ -1,5 +1,5 @@
 from totp_auth.constants import LANGUAGES_DIRS
-from totp_auth.utils.translator import Translator
+from totp_auth.loaders import Translator
 
 
 def test_translator():

@@ -43,10 +43,10 @@ class WidgetLanguage(Language):
 
 
 class Translator:
-    def __init__(self, *languages_dirs: str):
+    def __init__(self, *languages_dirs: Path):
         self._langs: dict[str, dict] = defaultdict(dict)
         for languages_dir in languages_dirs:
-            for lang_file in Path(languages_dir).glob("*.json"):
+            for lang_file in languages_dir.glob("*.json"):
                 lang_data = self._load_language(lang_file)
                 self._langs[lang_file.stem].update(lang_data)
 
