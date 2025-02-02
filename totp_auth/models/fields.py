@@ -46,7 +46,7 @@ class InputTextField(Field[str]):
 
     def check_field(self, data: str) -> str:
         if len(data) > self.max_length:
-            raise FieldError(FieldErrorList.INCORRECT_LENGTH)
+            raise FieldError(FieldErrorList.INCORRECT_LENGTH, self.name)
         return data if self.auto_lower else data.lower()
 
 
@@ -71,7 +71,7 @@ class InputPasswordField(Field[str]):
 
     def check_field(self, data: str) -> str:
         if len(data) > self.max_length:
-            raise FieldError(FieldErrorList.INCORRECT_LENGTH)
+            raise FieldError(FieldErrorList.INCORRECT_LENGTH, self.name)
         return data
 
 
@@ -105,9 +105,9 @@ class InputNumericField(Field[int]):
 
     def check_field(self, data: str) -> int:
         if not data.isdigit():
-            raise FieldError(FieldErrorList.NOT_DIGIT)
+            raise FieldError(FieldErrorList.NOT_DIGIT, self.name)
         if len(data) != self.digits_count:
-            raise FieldError(FieldErrorList.INCORRECT_LENGTH)
+            raise FieldError(FieldErrorList.INCORRECT_LENGTH, self.name)
         return int(data)
 
 
@@ -130,9 +130,9 @@ class InputEmailField(Field[str]):
 
     def check_field(self, data: str) -> str:
         if len(data) > 320:
-            raise FieldError(FieldErrorList.INCORRECT_LENGTH)
+            raise FieldError(FieldErrorList.INCORRECT_LENGTH, self.name)
         if re.fullmatch(r"[a-z0-9]{1,}@[a-z0-9]{1,}\.[a-z]{1,}", data) is None:
-            raise FieldError(FieldErrorList.EMAIL_NOT_VALID)
+            raise FieldError(FieldErrorList.EMAIL_NOT_VALID, self.name)
         return data
 
 

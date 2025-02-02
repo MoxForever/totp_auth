@@ -3,12 +3,11 @@ from typing import Literal
 from totp_auth.models import AuthWidget
 from totp_auth.models.fields import InputTextField, InputNumericField
 from totp_auth.utils.errors import InvalidCredentials
-from totp_auth.utils.translator import Language
 
 
 class TOTPWidgetData:
     login: str
-    code: str
+    code: int
 
 
 class TOTPWidget(AuthWidget[TOTPWidgetData]):
@@ -19,6 +18,6 @@ class TOTPWidget(AuthWidget[TOTPWidgetData]):
     ]
 
     def _check_data(self, data: TOTPWidgetData) -> Literal[True]:
-        if data.login == "admin" and data.code == "admin":
+        if data.login == "admin" and data.code == 123456:
             return True
         raise InvalidCredentials("Invalid credentials")

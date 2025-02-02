@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from typing import Generic, TypeVar
 
 from totp_auth.utils.translator import WidgetLanguage
+from totp_auth.utils.errors import InvalidFields
 
 from .fields import Field
 
@@ -26,6 +27,8 @@ class AuthWidget(ABC, Generic[ReturnType]):
     def check_data(self, data: dict[str, str]):
         checked_data = {}
         for field in self.fields:
+            if field.name not in data:
+                raise InvalidFields(f"Field {field.name} is missing")
             checked_data[field.name] = field.check_field(data[field.name])
 
         self._check_data(

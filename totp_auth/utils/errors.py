@@ -9,8 +9,9 @@ class FieldErrorList(StrEnum):
 
 
 class FieldError(Exception):
-    def __init__(self, error: FieldErrorList):
+    def __init__(self, error: FieldErrorList, field_name: str):
         self.error = error
+        self.field_name = field_name
 
 
 class InvalidCredentials(Exception):
