@@ -7,8 +7,14 @@ from totp_auth.models.auth_widget import AuthWidget
 
 class WidgetsLoader:
     def __init__(self, *widgets_dirs: Path):
+        self._widgets_dirs = widgets_dirs
         self._widgets: dict[str, AuthWidget] = {}
-        for widgets_dir in widgets_dirs:
+
+        self.reload()
+
+    def reload(self):
+        self._widgets.clear()
+        for widgets_dir in self._widgets_dirs:
             for widget_path in widgets_dir.glob("*.py"):
                 if widget_path.stem == "__init__":
                     continue
