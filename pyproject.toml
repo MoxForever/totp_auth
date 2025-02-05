@@ -15,6 +15,9 @@ dependencies = [
     "pyotp>=2.9.0",
     "Jinja2>=3.1.5",
     "tinydb>=4.8.2",
+    "fastapi>=0.115.8",
+    "uvicorn>=0.34.0",
+    "pydantic>=2.10.6",
 ]
 
 [project.scripts]

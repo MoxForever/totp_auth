@@ -10,7 +10,7 @@
     </head>
     <body>
         <div class="window">
-            <div class="widget-container">
+            <form class="widget-container" method="POST">
                 <div class="header">
                     <h1>{{ title }}</h1>
                 </div>
@@ -18,7 +18,7 @@
                     {{ selected_widget_html | safe }}
                 </div>
                 <div class="login">
-                    <button>{{ _("button") }}</button>
+                    <button type="submit">{{ _("button") }}</button>
                 </div>
                 {% if another_widgets|length > 0 %}
                     <div class="widget-list">
@@ -27,7 +27,7 @@
                         {% endfor %}
                     </div>
                 {% endif %}
-            </div>
+            </form>
         </div>
     </body>
 </html>

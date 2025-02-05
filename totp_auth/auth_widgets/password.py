@@ -1,10 +1,11 @@
+from dataclasses import dataclass
 from typing import Literal
 
-from totp_auth.models import AuthWidget
-from totp_auth.models.fields import InputTextField, InputPasswordField
-from totp_auth.errors import InvalidCredentials
+from totp_auth.core.models import AuthWidget, InputTextField, InputPasswordField
+from totp_auth.core.errors import InvalidCredentials
 
 
+@dataclass
 class PasswordWidgetData:
     login: str
     password: str
